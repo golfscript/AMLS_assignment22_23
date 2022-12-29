@@ -3,7 +3,8 @@ from matplotlib import pyplot as plt
 from skimage import io
 from sklearn.decomposition import PCA
 from sklearn.svm import SVC
-from sklearn.model_selection import GridSearchCV
+from sklearn.experimental import enable_halving_search_cv
+from sklearn.model_selection import HalvingGridSearchCV
 
 def load_image(filename):
     img = io.imread(filename, as_gray=True) # use built-in grayscale loading
@@ -21,10 +22,11 @@ def feature_extraction(X, test=False):
 
 def fit(X, y):
     global model
-    param_grid = {'C':[0.01, 0.1, 1, 10, 100], 'gamma':[0.001, 0.01, 0.1, 1, 10]}
-    model = GridSearchCV(SVC(), param_grid, verbose=3).fit(X, y)
+    param_grid = {'C':[0.5, 20], 'gamma':[0.005, 0.1]}
+    model = HalvingGridSearchCV(SVC(), param_grid, verbose=3).fit(X, y)
+    print(model.best_params_)
     return model.score(X, y)
 
 def predict(X):
     global model
-    return model.preict(X)
+    return model.predict(X)
