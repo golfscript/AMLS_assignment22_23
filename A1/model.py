@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from skimage import io
 from sklearn.decomposition import PCA
+from sklearn.svm import SVC
 
 def load_image(filename):
     img = io.imread(filename, as_gray=True) # use built-in grayscale loading
@@ -16,3 +17,7 @@ def feature_extraction(X, test=False):
         plt.plot(pca.explained_variance_ratio_.cumsum())
         plt.show()
     return pca.transform(Xf)
+
+def predict(X_train, y_train, X_test):
+    model = SVC().fit(X_train, y_train)
+    return model.predict(X_test)
