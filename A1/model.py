@@ -22,10 +22,10 @@ def feature_extraction(X, test=False):
 
 def fit(X, y):
     global model
-    param_grid = {'C':[0.5, 1, 2, 5, 10], 'gamma':[0.005, 0.01, 0.02, 0.05, 0.1]}
+    param_grid = {'kernel':['rbf','sigmoid'], 'C':[0.5, 1, 2, 5, 10], 'gamma':[0.005, 0.01, 0.02, 0.05, 0.1]}
     model = HalvingGridSearchCV(SVC(), param_grid, verbose=3).fit(X, y)
     print(model.best_params_)
-    return model.score(X, y)
+    return model.best_score_
 
 def predict(X):
     global model
