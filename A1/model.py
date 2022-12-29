@@ -1,6 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from skimage import io
+from skimage import io, exposure
 from sklearn.decomposition import PCA
 from sklearn.svm import SVC
 from sklearn.experimental import enable_halving_search_cv
@@ -9,7 +9,7 @@ from sklearn.model_selection import HalvingGridSearchCV
 def load_image(filename):
     img = io.imread(filename, as_gray=True) # use built-in grayscale loading
     crop = img[90:180, 54:124] # crop to face
-    return crop
+    return exposure.equalize_hist(crop)
 
 def feature_extraction(X, test=False):
     global pca
