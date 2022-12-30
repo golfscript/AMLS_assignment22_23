@@ -3,6 +3,7 @@ import tensorflow as tf
 from skimage import io, exposure
 
 RND = 1 # use in all functions that need random seed in order to ensure repeatability
+tf.random.set_seed(RND)
 
 def load_image(filename):
     img = io.imread(filename, as_gray=True) # use built-in grayscale loading
@@ -28,7 +29,7 @@ def fit(X, y):
     
     model.fit(X, y, epochs=10)
 
-    return model.evaluate(X,y)
+    return model
 
 def predict(X):
     global model

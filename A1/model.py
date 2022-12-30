@@ -22,8 +22,9 @@ def fit(X, y):
     Xp = pca.transform(Xf)
     param_grid = {'kernel':['rbf','sigmoid'], 'C':[0.5, 1, 2, 5, 10], 'gamma':[0.005, 0.01, 0.02, 0.05, 0.1]}
     model = HalvingGridSearchCV(SVC(), param_grid, verbose=3).fit(Xp, y)
-    print(model.best_params_)
-    return model.best_score_
+    print("Optimal hyper-parameters:", model.best_params_)
+    print("Mean cross-validated accuracy:", model.best_score)
+    return model
 
 def predict(X):
     global pca,model
