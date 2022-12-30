@@ -11,12 +11,12 @@ RND = 1 # use in all functions that need random seed in order to ensure repeatab
 def load_image(filename):
     img = io.imread(filename, as_gray=True) # use built-in grayscale loading
     crop = img[90:180, 54:124] # crop to face
-    return exposure.equalize_hist(crop)
+    return exposure.equalize_adapthist(crop)
 
 def fit(X, y):
     global pca,model
     Xf = X.reshape(len(X),-1) # use this to flatten the last dims of X without copying
-    pca = PCA(n_components=100, random_state=RND).fit(Xf)
+    pca = PCA(n_components=120, random_state=RND).fit(Xf)
     plt.plot(pca.explained_variance_ratio_.cumsum())
     plt.show()
     Xp = pca.transform(Xf)
