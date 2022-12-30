@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from skimage import io, exposure
 from sklearn.decomposition import PCA
 from sklearn.svm import SVC
-from sklearn.experimental import enable_halving_search_cv
+from sklearn.experimental import enable_halving_search_cv # need this to enable line below
 from sklearn.model_selection import HalvingGridSearchCV
 
 RND = 1 # use in all functions that need random seed in order to ensure repeatability
