@@ -1,15 +1,15 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from PIL import Image, ImageOps
+import cv2
 from sklearn import tree
 
 RND = 1 # use in all functions that need random seed in order to ensure repeatability
 
 def load_image(filename):
-    img = ImageOps.grayscale(Image.open(filename)) # use built-in grayscale conversion
-    crop = img.crop((150,160,350,400)) # crop to face
-    scale = ImageOps.scale(crop,1/3,Image.NEAREST) # rescale to one third size
-    return np.asarray(scale)/255.0 # convert to range [0,1]
+    img = cv2.imread(filename, cv2.IMREAD_GRAYSCALE) # use built-in grayscale conversion
+    crop = img[160:400,150:350] # crop to face
+    scale = cv2.resize(crop,None,fx=1/2,fy=1/2,interpolation=cv2.INTER_NEAREST_EXACT) # rescale to one third size
+    return scale/255.0 # convert to range [0,1]
 
 def fit(X, y):
     global model
