@@ -6,6 +6,8 @@ from sklearn.svm import SVC
 from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import HalvingGridSearchCV
 
+RND = 1 # use in all functions that need random seed in order to ensure repeatability
+
 def load_image(filename):
     img = io.imread(filename, as_gray=True) # use built-in grayscale loading
     crop = img[90:180, 54:124] # crop to face
@@ -14,7 +16,7 @@ def load_image(filename):
 def fit(X, y):
     global pca,model
     Xf = X.reshape(len(X),-1) # use this to flatten the last dims of X without copying
-    pca = PCA(n_components=100).fit(Xf)
+    pca = PCA(n_components=100, random_state=RND).fit(Xf)
     plt.plot(pca.explained_variance_ratio_.cumsum())
     plt.show()
     Xp = pca.transform(Xf)
