@@ -9,7 +9,7 @@ def load_image(filename):
     img = cv2.imread(filename, cv2.IMREAD_GRAYSCALE) # use built-in grayscale conversion
     crop = img[160:400,150:350] # crop to face
     scale = cv2.resize(crop,None,fx=1/2,fy=1/2,interpolation=cv2.INTER_NEAREST_EXACT) # rescale to one third size
-    return scale/255.0 # convert to range [0,1]
+    return scale
 
 def fit(X, y):
     global model
@@ -18,7 +18,7 @@ def fit(X, y):
     plt.figure(figsize=(12,10))
     tree.plot_tree(model, fontsize=9) # plot the decision tree
     plt.show()
-    return model
+    return model.score(X,y)
 
 def predict(X):
     global model

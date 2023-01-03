@@ -7,7 +7,8 @@ RND = 1 # use in all functions that need random seed in order to ensure repeatab
 
 def load_image(filename):
     img = cv2.imread(filename) # this task needs colour
-    return img[240:280,160:340,::-1]/255.0 # crop to eyes, reverse GBR to RGB
+    crop = img[240:280,160:340,::-1] # crop to eyes, reverse GBR to RGB
+    return crop
 
 def fit(X, y):
     global model
@@ -16,7 +17,7 @@ def fit(X, y):
     plt.figure(figsize=(12,10))
     tree.plot_tree(model, fontsize=9) # plot the decision tree
     plt.show()
-    return model
+    return model.score(X,y)
 
 def predict(X):
     global model
