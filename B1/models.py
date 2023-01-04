@@ -21,18 +21,18 @@ def _plot(model):
 
 class DecisionTree:
   def __init__(self, max_depth):
-    self.max_depth = max_depth
+    self.model = tree.DecisionTreeClassifier(max_depth=max_depth, random_state=RND)
 
   def fit(self, X, y):
     X = _prepare(X)
     print('Peforming Decision Tree Fitting')
-    self.model = tree.DecisionTreeClassifier(max_depth=self.max_depth, random_state=RND).fit(X, y)
+    self.model.fit(X, y)
     _plot(self.model)
     return self.model.score(X,y)
 
   def predict(self, X):
     X = _prepare(X)
-    return self.model.predict(X) # select prediction with highest output
+    return self.model.predict(X)
 
 options = {'Best: Decision Tree with max depth of 6': DecisionTree(6),
           'Decision Tree with max depth of 5': DecisionTree(5),
