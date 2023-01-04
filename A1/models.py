@@ -70,7 +70,7 @@ class PCA_SVC:
     X = self.pca.transform(X)
     return self.svc.predict(X)
 
-models = {'Best: PCA(120) & SVC Halving Grid Search with Cross Validation': PCA_SVC_HCV(120),
+options = {'Best: PCA(120) & SVC Halving Grid Search with Cross Validation': PCA_SVC_HCV(120),
           'PCA(120) & SVC with default params': PCA_SVC(120),
           'PCA(100) & SVC with default params': PCA_SVC(100),
           'PCA(140) & SVC with deafult params': PCA_SVC(140)}
