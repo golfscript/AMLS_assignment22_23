@@ -13,25 +13,35 @@ def _prepare(X):
   return X.reshape(*X.shape,1) if X.ndim == 3 else X # reshape if necessary for Conv2D layer
 
 class CNN:
-  def __init__(self, cnn_layer1, cnn_layer2, activation='relu', epochs=5):
-    self.cnn_layer1 = cnn_layer1
-    self.cnn_layer2 = cnn_layer2
+  def __init__(self, cnn_layers=(), dense_layers=(), activation='relu', dropout=0, regularizer=None, epochs=6):
+    self.cnn_layers = cnn_layers
+    self.dense_layers = dense_layers
     self.activation = activation
+    self.dropout = dropout
+    self.regularizer = regularizer
     self.epochs = epochs
 
   def fit(self, X, y, X_test=None, y_test=None):
     X = _prepare(X)
     tf.keras.utils.set_random_seed(RND)
-    classes = y.max()+1 # generalise to work with any number of classed
-    self.model = tf.keras.Sequential([
-      tf.keras.layers.Rescaling(1./255), # rescale
-      tf.keras.layers.Conv2D(self.cnn_layer1, 3, activation=self.activation),
-      tf.keras.layers.MaxPooling2D(),
-      tf.keras.layers.Conv2D(self.cnn_layer2, 3, activation=self.activation),
-      tf.keras.layers.MaxPooling2D(),
-      tf.keras.layers.Flatten(),
-      tf.keras.layers.Dense(classes)
-      ])
+    self.model = tf.keras.Sequential([tf.keras.layers.Rescaling(1./255, input_shape=X.shape[1:])]) # rescale
+
+    for n in self.cnn_layers: # add CNN layers
+      self.model.add(tf.keras.layers.Conv2D(n, 3, activation=self.activation))
+      self.model.add(tf.keras.layers.MaxPooling2D())
+      if self.dropout>0:
+        self.model.add(tf.keras.layers.SpatialDropout2D(self.dropout))
+  
+    self.model.add(tf.keras.layers.Flatten())
+    for n in self.dense_layers: # add dense layers
+      self.model.add(tf.keras.layers.Dense(n, activation=self.activation, kernel_regularizer=self.regularizer))
+      if self.dropout>0:
+        self.model.add(tf.keras.layers.Dropout(self.dropout))
+
+    self.model.add(tf.keras.layers.Dense(y.max()+1)) # final layer for classification
+
+    self.model.summary()
+
     self.model.compile(
       optimizer='adam',
       loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
@@ -44,5 +54,6 @@ class CNN:
     return self.model.predict(X).argmax(axis=-1) # select prediction with highest output
 
 
-models = {'Best: CNN Layer1: 4, CNN Layer2: 4':CNN(4,4),
-          'CNN Layer1: 4, CNN Layer2: 4, sigmoid activation': CNN(4,4,'sigmoid')}
+options = {'Best: CNN(4,4)':CNN((4,4)),
+          'CNN(4,4) sigmoid activation': CNN((4,4),activation='sigmoid'),
+          'CNN(32,64,128) Dense(256) with dropout 0.3 & l2 reg':CNN((32,64,128),(256,),dropout=0.3,regularizer='l2')}
