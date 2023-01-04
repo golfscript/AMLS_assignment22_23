@@ -24,14 +24,15 @@ class DecisionTree:
 
   def fit(self, X, y):
     X = _prepare(X)
-    print('Peforming Decision Tree Classification')
+    print('Peforming Decision Tree Fitting')
     self.model = tree.DecisionTreeClassifier(max_depth=8, random_state=RND).fit(X, y)
     _plot(self.model)
     return self.model.score(X,y)
 
-def predict(self, X):
+  def predict(self, X):
     X = _prepare(X)
     return self.model.predict(X) # select prediction with highest output
 
 models = {'Best: Decision Tree with max depth of 8': DecisionTree(8),
+          'Decision Tree with max depth of 9': DecisionTree(9),
           'Decision Tree with max depth of 7': DecisionTree(7)}
