@@ -34,7 +34,7 @@ class DecisionTree:
     X = _prepare(X)
     return self.model.predict(X)
 
-options = {'Best: Decision Tree with max depth of 6': DecisionTree(6),
+options = {'*Best B1: Decision Tree with max depth of 6': DecisionTree(6),
           'Decision Tree with max depth of 5': DecisionTree(5),
           'Decision Tree with max depth of 4': DecisionTree(4),
           'Decision Tree with max depth of 3': DecisionTree(3)}

@@ -27,14 +27,14 @@ def _crop_enhance(X):
 
 class DecisionTree:
   def __init__(self, max_depth, crop_enhance):
-    self.max_depth = max_depth
+    self.model = tree.DecisionTreeClassifier(max_depth=max_depth, random_state=RND)
     self.crop_enhance = crop_enhance
 
   def fit(self, X, y):
     if self.crop_enhance: X = _crop_enhance(X) 
     X = _prepare(X)
     print('Peforming Decision Tree Fitting')
-    self.model = tree.DecisionTreeClassifier(max_depth=self.max_depth, random_state=RND).fit(X, y)
+    self.model.fit(X, y)
     _plot(self.model)
     return self.model.score(X,y)
 
@@ -43,7 +43,7 @@ class DecisionTree:
     X = _prepare(X)
     return self.model.predict(X) # select prediction with highest output
 
-options = {'Best: Crop, Enhance & Decision Tree max depth of 4': DecisionTree(4, True),
+options = {'*Best B2: Crop, Enhance & Decision Tree max depth of 4': DecisionTree(4, True),
           'Decision Tree max depth of 8': DecisionTree(8, False),
           'Decision Tree max depth of 7': DecisionTree(7, False),
           'Decision Tree max depth of 6': DecisionTree(6, False)}
