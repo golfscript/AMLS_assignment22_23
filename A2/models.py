@@ -1,4 +1,6 @@
 import numpy as np
+from os import environ
+environ['TF_CPP_MIN_LOG_LEVEL'] = '1' # suppress TensorFlow info messages
 import tensorflow as tf
 import cv2
 
@@ -23,7 +25,7 @@ class CNN:
     self.epochs = epochs
     self.weights_file = weights_file
 
-  def fit(self, X, y, X_test=None, y_test=None):
+  def fit(self, X, y, validation_data=None):
     X = _prepare(X)
     tf.keras.utils.set_random_seed(RND)
     self.model = tf.keras.Sequential([tf.keras.layers.Rescaling(1./255, input_shape=X.shape[1:])]) # rescale
@@ -54,7 +56,7 @@ class CNN:
     
     if self.epochs==0: return self.model.evaluate(X, y)[1]
     
-    return self.model.fit(X, y, epochs=self.epochs, validation_data=(X_test, y_test)).history['accuracy'][-1]
+    return self.model.fit(X, y, epochs=self.epochs, validation_data=validation_data).history['accuracy'][-1]
 
   def predict(self, X):
     X = _prepare(X)
