@@ -56,4 +56,4 @@ class CNN:
 
 options = {'*Best A2: CNN(4,4)':CNN((4,4)),
           'CNN(4,4) sigmoid activation': CNN((4,4),activation='sigmoid'),
-          'CNN(32,64,128) Dense(256) with dropout 0.3 & l2 reg':CNN((32,64,128),(256,),dropout=0.3,regularizer='l2')}
+          'CNN(32,64,128) Dense(256) with dropout 0.3 & l2 reg':CNN((32,64,128),(256,),dropout=0.3,regularizer='l2',epochs=10)}

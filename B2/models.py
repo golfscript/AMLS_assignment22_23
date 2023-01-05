@@ -19,10 +19,12 @@ def _plot(model):
   plt.show()
 
 def _crop_enhance(X):
+  print('Peforming extreme cropping and contrast streching...')
   X = X[:,25,30:45].astype(np.uint16)
   # Contrast stretching
   mn = X.min(axis=1,keepdims=True)
   mx = X.max(axis=1,keepdims=True)
+  print(f'{(mn==mx).all(axis=-1).mean():.2%} of samples have no variance')
   return 255*(X-mn)//np.maximum((mx-mn),1)
 
 class DecisionTree:
@@ -33,7 +35,7 @@ class DecisionTree:
   def fit(self, X, y):
     if self.crop_enhance: X = _crop_enhance(X) 
     X = _prepare(X)
-    print('Peforming Decision Tree Fitting')
+    print('Peforming Decision Tree Fitting...')
     self.model.fit(X, y)
     _plot(self.model)
     return self.model.score(X,y)

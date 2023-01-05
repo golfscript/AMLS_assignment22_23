@@ -25,7 +25,7 @@ class DecisionTree:
 
   def fit(self, X, y):
     X = _prepare(X)
-    print('Peforming Decision Tree Fitting')
+    print('Peforming Decision Tree Fitting...')
     self.model.fit(X, y)
     _plot(self.model)
     return self.model.score(X,y)

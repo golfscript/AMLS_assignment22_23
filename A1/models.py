@@ -16,9 +16,11 @@ def load_image(filename):
   return crop
 
 def _clahe(X): # Contrast limited adaptive histogram equalisation
-  print("Performing Contrast Limited Adaptive Histogram Equalisation...")
+  print("Performing Contrast Limited Adaptive Histogram Equalisation", end='')
   for i in range(len(X)):
     X[i] = exposure.equalize_adapthist(X[i])
+    if i%100 == 0: print('.', end='')
+  print()
 
 def _prepare(X, clahe):
   X = np.divide(X,255,dtype=np.float32) # convert to [0,1] and limit to float32 to save space
@@ -78,7 +80,7 @@ class PCA_SVC:
     X = self.pca.transform(X)
     return self.svc.predict(X)
 
-options = {'Best A1: Clahe, PCA(120) & SVC Halving Grid Search with Cross Validation': PCA_SVC_HCV(120),
+options = {'*Best A1: Clahe, PCA(120) & SVC Halving Grid Search with Cross Validation': PCA_SVC_HCV(120),
           'Clahe, PCA(120) & SVC(default params)': PCA_SVC(120),
           'Clahe, PCA(100) & SVC with default params': PCA_SVC(100),
           'Clahe, PCA(140) & SVC with deafult params': PCA_SVC(140),
