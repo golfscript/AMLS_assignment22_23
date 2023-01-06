@@ -8,7 +8,7 @@ DATASETS = 'Datasets'
 IMGS = 'img'
 TEST = '_test'
 
-def load_data(folder, feature_col, file_col, load_image, test=False, augment=False):
+def load_data(folder, feature_col, file_col, load_image, test=False):
   if test: folder += TEST # if loading test data add TEST to folder name
   filenames, y = np.genfromtxt(
       path.join(DATASETS,folder,LABELS),
@@ -22,19 +22,16 @@ def load_data(folder, feature_col, file_col, load_image, test=False, augment=Fal
   imagedir = path.join(DATASETS,folder,IMGS)
   n = len(filenames)
   shape = load_image(path.join(imagedir,filenames[0])).shape # get first image to get shape
-  X = np.empty((n*2 if augment else n, *shape), dtype=np.uint8) # pre-define X, much more efficient than concatenating arrays
+  X = np.empty((n, *shape), dtype=np.uint8) # pre-define X, much more efficient than concatenating arrays
   for i in tqdm(range(n), desc=folder): # tqdm displays a nice loading bar
       X[i] = load_image(path.join(imagedir,filenames[i]))
-  if augment:
-      X[n:] = X[:n,:,::-1]  # copy images, but reverse left to right
-      y = np.tile(y,2) # duplicate labels
   print(f'Loaded {X.nbytes:,} bytes')
   show_images(X[:5],y[:5])
   return X, y
 
 def show_images(X, y):
   plt.figure(figsize=(12,3))
-  for i in range(len(X)):
+  for i in range(5):
     plt.subplot(1, 5, i+1)
     plt.axis('off')
     plt.title(f'[{i}] class:{y[i]}')

@@ -29,6 +29,7 @@ class CNN:
     X = _prepare(X)
     tf.keras.utils.set_random_seed(RND)
     self.model = tf.keras.Sequential([tf.keras.layers.Rescaling(1./255, input_shape=X.shape[1:])]) # rescale
+    self.model.add(tf.keras.layers.RandomFlip(mode='horizontal')) # data augmentation
 
     for n in self.cnn_layers: # add CNN layers
       self.model.add(tf.keras.layers.Conv2D(n, 3, activation=self.activation))
@@ -63,10 +64,12 @@ class CNN:
 
   def predict(self, X):
     X = _prepare(X)
-    return self.model.predict(X).argmax(axis=-1) # select prediction with highest output
+    y = self.model.predict(X)
+    if y.shape[1]>1: return y.argmax(axis=-1) # select prediction with highest output
+    return (y.reshape(-1)>=0.5)*1 # convert to 0 or 1
 
 options = {'*Best A2: CNN(4,4) pool size 3 relu': CNN((4,4), pool_size=3, epochs=30),
           'CNN(4,4) relu':CNN((4,4)),
           'CNN(4,4) sigmoid': CNN((4,4),activation='sigmoid'),
           'CNN(32,64,128) Dense(256) with dropout 0.3 & l2 reg, relu':CNN((32,64,128),dense_layers=(256,),dropout=0.3,regularizer='l2',epochs=10),
-          'CNN(4,4) pool size 3, relu (saved weights)': CNN((4,4), pool_size=3, epochs=0, weights_file='A2/p622a9090')}
+          'CNN(4,4) pool size 3, relu (saved weights)': CNN((4,4), pool_size=3, epochs=0, weights_file='A2/cnn44pool3')}
