@@ -42,19 +42,22 @@ class CNN:
       if self.dropout>0:
         self.model.add(tf.keras.layers.Dropout(self.dropout))
 
-    self.model.add(tf.keras.layers.Dense(y.max()+1)) # final layer for classification
+    final_layer = y.max()+1
+    loss_fn = tf.keras.losses.SparseCategoricalCrossentropy
+    if final_layer == 2:
+      final_layer = 1 # if only two classes then it's a binary problem
+      loss_fn = tf.keras.losses.BinaryCrossentropy
 
-    self.model.summary()
+    self.model.add(tf.keras.layers.Dense(final_layer)) # final layer for classification
 
-    if self.weights_file:
-      self.model.load_weights(self.weights_file)
+    self.model.summary() # print a summary of the model
 
-    self.model.compile(
-      optimizer='adam',
-      loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-      metrics=['accuracy'])
+    if self.weights_file: # if load file specified
+      self.model.load_weights(self.weights_file) # then load weights
+
+    self.model.compile(optimizer='adam', loss=loss_fn(from_logits=True), metrics=['accuracy'])
     
-    if self.epochs==0: return self.model.evaluate(X, y)[1]
+    if self.epochs==0: return self.model.evaluate(X, y)[1] # if epochs=0, then just return evaluation
     
     return self.model.fit(X, y, epochs=self.epochs, validation_data=validation_data).history['accuracy'][-1]
 
