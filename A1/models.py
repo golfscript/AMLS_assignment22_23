@@ -1,14 +1,15 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib.ticker import PercentFormatter
+from tqdm.notebook import tqdm
 import cv2
 from skimage import exposure
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, FunctionTransformer
 from sklearn.svm import SVC
 from sklearn.experimental import enable_halving_search_cv # need this to enable line below
 from sklearn.model_selection import HalvingGridSearchCV
 from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import cross_val_score
 
 RND = 1 # use in all functions that need random seed in order to ensure repeatability
 
@@ -17,52 +18,99 @@ def load_image(filename):
   crop = img[90:180, 54:124] # crop to face
   return crop
 
-def _prepare(X, clahe, augment):
-  Z = np.empty((2 if augment else 1,*X.shape), dtype=np.float32) # limit to float32 to save space
-  if clahe:
-    print("Performing Contrast Limited Adaptive Histogram Equalisation", end='')
-    eq = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(5,6)) # choose grid that divides 70*90 image
-    for i in range(len(X)):
-      Z[0][i] = eq.apply(X[i])/255.
-      if i%100 == 0: print('.', end='')
-    print()
-  else:
-    Z[0] = X/255. # just convert to [0,1]
+def _augment(X, y):
+  print('Performing Data Augmentation...')
+  n = len(X)
+  y = np.tile(y,2)
+  X = np.tile(X,(2,1,1))
+  X[n:] = X[:n,:,::-1]  # copy images, but reverse left to right
 
-  if augment:
-    print('Performing Data Augmentation...')
-    Z[1] = Z[0,:,:,::-1]  # copy images, but reverse left to right
-  
   plt.figure(figsize=(12,3))
   for i in range(5):
     plt.subplot(1, 5, i+1)
     plt.axis('off')
     plt.title(f'[{i}]')
-    plt.imshow(Z[-1,i], cmap='gray')
+    plt.imshow(X[i+n], cmap='gray')
   plt.show()
 
-  return Z.reshape(len(Z)*len(X),-1) # flatten the last dims of Z without copying
+  return X, y
 
-def _plot(pca):
-  plt.title(f'Cumulative sum of variance explanied by {pca.n_components_} componets = {pca.explained_variance_ratio_.sum():.0%}')
-  plt.plot(pca.explained_variance_ratio_.cumsum())
-  plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
-  plt.show()
+def _clahe(X):
+  eq = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(5,6)) # choose grid that divides 70*90 image
+  Z = X.copy()
+  for i in range(len(Z)):
+    Z[i] = eq.apply(Z[i])
+  return Z
+
+def _prepare(X, y, clahe, augment):
+  if clahe: X = _clahe(X)
+  if augment: X, y = _augment(X, y)
+  return X,y
+
+def flat_scale(X):
+  return np.divide(X.reshape((len(X),-1)),255.,dtype=np.float32)
 
 class base:
-  def __init__(self, pca_components, clahe=True, augment=True):
-    self.model = make_pipeline(PCA(n_components=pca_components,random_state=RND), StandardScaler(), SVC())
+  def __init__(self, pca_components=60, clahe=True, augment=True):
+    self.model = make_pipeline(FunctionTransformer(flat_scale), PCA(n_components=pca_components,random_state=RND), StandardScaler(), SVC())
     self.clahe = clahe
     self.augment = augment
 
   def predict(self, X):
-    X = _prepare(X, self.clahe, False)
+    X,_ = _prepare(X, None, self.clahe, False) # don't need to augment prediction
     return self.model.predict(X)
+
+class PCA_SVC_Optimise(base):
+  def fit(self, X, y):
+    print('Peforming Cross Validation on Contrast Limited Adaptive Histogram Equalisation...')
+    best_score = cross_val_score(self.model, X, y, n_jobs=-1).mean()
+
+    Xc = _clahe(X)
+    clahe_score = cross_val_score(self.model, Xc, y, n_jobs=-1).mean()
+    plt.plot(['No CLAHE', 'CLAHE'], [best_score, clahe_score])
+    plt.show()
+
+    self.clahe = clahe_score > best_score # use CLAHE if cv score is better
+    if self.clahe:
+      X = Xc
+      best_score = clahe_score
+
+    params = {'svc__kernel':['linear','poly','rbf','sigmoid'],
+              'svc__C':[0.1, 1, 10],
+              'svc__gamma':[0.001, 'scale', 0.1],
+              'pca__n_components':[80, 100, 120, 140]}
+    
+    for param, values in params.items():
+      print(f'Peforming Cross Validation on optimal {param}...')
+      prog_bar = tqdm(values, desc='cross validation')
+      scores = [cross_val_score(self.model.set_params(**{param:v}), X, y, n_jobs=-1).mean() for v in prog_bar]
+      plt.plot([str(v) for v in values], scores)
+      plt.show()
+
+      best = values[np.argmax(scores)]
+      best_score = max(scores)
+      print(f'Optimal {param} is', best)
+      self.model.set_params(**{param:best})
+    
+    X, y = _augment(X, y)
+  
+    print('Peforming Cross Validation on Contrast Limited Adaptive Histogram Equalisation...')
+    aug_score = cross_val_score(self.model, X, y, n_jobs=-1).mean()
+    plt.plot(['No augmentation', 'Data augmentaion'], [best_score, aug_score])
+    plt.show()
+
+    self.augment = aug_score>best_score
+    print('Performing final fit on all data with optimal params...')
+    if (self.augment):
+      self.model.fit(X,y)
+    else:
+      self.model.fit(X[:len(X)//2],y[:len(y)//2])
+
+    return self.model.score(X,y)
 
 class PCA_SVC_HCV(base):
   def fit(self, X, y):
-    X = _prepare(X, self.clahe, self.augment)
-    if self.augment: y = np.tile(y,2) # duplicate labels
+    X,y = _prepare(X, y, self.clahe, self.augment)
     
     print('Performing Halving Grid Search with Cross Validation...')
     Cs = [0.01, 0.1, 1]
@@ -77,18 +125,12 @@ class PCA_SVC_HCV(base):
 
 class PCA_SVC(base):
   def fit(self, X, y):
-    X = _prepare(X, self.clahe, self.augment)
-    if self.augment: y = np.tile(y,2) # duplicate labels
+    X, y = _prepare(X, y, self.clahe, self.augment)
 
     print('Performing Support Vector Classification Fit...')
     self.model.fit(X,y)
     return self.model.score(X,y)
 
-options = {'*Best A1: Clahe, Augment, PCA & SVC Halving Grid Search with Cross Validation': PCA_SVC_HCV(),
-          'Clahe, Augment, PCA(120) & SVC(default params)': PCA_SVC(120),
-          'Clahe, Augment, PCA(100) & SVC with default params': PCA_SVC(100),
-          'Clahe, Augment, PCA(140) & SVC with deafult params': PCA_SVC(140),
-          'Augment, PCA(120) & SVC Halving Grid Search with Cross Validation': PCA_SVC_HCV(120, clahe=False),
-          'Augment, PCA(120) & SVC with default params': PCA_SVC(120, clahe=False),
-          'PCA(120) & SVC with default params': PCA_SVC(120, clahe=False, augment=False),
-          'Augment, PCA(140) & SVC with default params': PCA_SVC(140, clahe=False)}
+options = {'*Best A1: PCA & SVC with CV optimised paramaters': PCA_SVC_Optimise(),
+          'Clahe, Augment, PCA & SVC Halving Grid Search with Cross Validation': PCA_SVC_HCV(120),
+          'Clahe, Augment, PCA(120) & SVC(default params)': PCA_SVC(120)}
