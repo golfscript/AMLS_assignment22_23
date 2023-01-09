@@ -29,7 +29,7 @@ class DecisionTree:
     X = _prepare(X)
     min_depth = y.max() # need at least this many nodes to distinguish all classes
     self.model.set_params(max_depth=min_depth)
-    params = {'criterion':['gini', 'entropy'], 'max_depth':range(min_depth, min_depth+6)}
+    params = {'criterion':['gini', 'entropy'], 'max_depth':range(min_depth, min_depth+4)}
     
     for param, values in params.items():
       print(f'Peforming Cross Validation on optimal {param}...')
