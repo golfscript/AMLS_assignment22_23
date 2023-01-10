@@ -60,7 +60,7 @@ class CNN:
     
     if self.epochs==0: return self.model.evaluate(X, y)[1] # if epochs=0, then just return evaluation
     
-    return self.model.fit(X, y, epochs=self.epochs, validation_data=validation_data).history['accuracy'][-1]
+    return self.model.fit(X, y, epochs=self.epochs, validation_split=0.1, validation_data=validation_data).history['accuracy'][-1]
 
   def predict(self, X):
     X = _prepare(X)
