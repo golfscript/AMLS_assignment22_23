@@ -20,7 +20,7 @@ def _plot(model):
   plot_tree(model, fontsize=9) # plot the decision tree
   plt.show()
 
-class DecisionTree:
+class DTree:
   def __init__(self, cv_optimise=False, **kwargs):
     self.model = DecisionTreeClassifier(random_state=RND, **kwargs)
     self.cv_optimise = cv_optimise
@@ -44,5 +44,5 @@ class DecisionTree:
     X = _prepare(X)
     return self.model.predict(X)
 
-options = {'*Best B1: Decision Tree with CV of optimal params': DecisionTree(True),
-           'Decision Tree with Entropy criterion and max depth of 6': DecisionTree(criterion='entropy', max_depth=6)}
+options = {'*Best B1: Decision Tree with CV of optimal params': DTree(cv_optimise=True),
+           'Decision Tree with Entropy criterion and max depth of 6': DTree(criterion='entropy', max_depth=6)}
