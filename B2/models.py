@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 import cv2
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.model_selection import GridSearchCV
-from utils import cv_optimiser
+import utils
 
 RND = 1 # use in all functions that need random seed in order to ensure repeatability
 
@@ -38,7 +38,7 @@ class DTreeCV:
     X = _prepare(X)
     min_depth = int(max(y)).bit_length() # need at least this many nodes to distinguish all classes
     params = {'criterion':['gini', 'entropy'], 'max_depth':range(min_depth, min_depth+6)}
-    self.model = cv_optimiser(DecisionTreeClassifier(random_state=RND, max_depth=min_depth), X, y, params)
+    self.model = utils.cv_optimiser(DecisionTreeClassifier(random_state=RND, max_depth=min_depth), X, y, params)
     _plot(self.model)
     return self.model.score(X,y)
 
@@ -47,5 +47,5 @@ class DTreeCV:
     X = _prepare(X)
     return self.model.predict(X)
 
-options = {'*Best B2: Iris Crop/Enhance & Decision Tree with CV': DTreeCV(True),
-          'Decision Tree with CV': DTreeCV(False)}
+options = {'*Best B2: Iris Enhance & Decision Tree with CV optimised paramaters': DTreeCV(True),
+          'No Iris Enhance & Decision Tree with CV optimised paramaters': DTreeCV(False)}

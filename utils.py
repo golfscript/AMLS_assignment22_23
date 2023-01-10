@@ -1,13 +1,18 @@
 import numpy as np
 from os import path
+from sklearn.model_selection import cross_val_score
+import A1.models as A1, A2.models as A2, B1.models as B1, B2.models as B2
 from matplotlib import pyplot as plt
 from tqdm.notebook import tqdm
-from sklearn.model_selection import cross_val_score
+import ipywidgets as widgets
 
 LABELS = 'labels.csv'
 DATASETS = 'Datasets'
 IMGS = 'img'
 TEST = '_test'
+
+TASKS = {'A1':('celeba',2,1,A1), 'A2':('celeba',3,1,A2), 'B1':('cartoon_set',2,3,B1),'B2':('cartoon_set',1,3,B2)}
+task_options = widgets.RadioButtons(options=TASKS, description='Task')
 
 def load_data(folder, feature_col, file_col, load_image, test=False):
   if test: folder += TEST # if loading test data add TEST to folder name

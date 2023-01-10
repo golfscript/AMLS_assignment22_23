@@ -69,7 +69,8 @@ class CNN:
     return (y.reshape(-1)>=0.5)*1 # convert to 0 or 1
 
 options = {'*Best A2: CNN(4,4) pool size 3 relu': CNN((4,4), pool_size=3, epochs=50),
-          'CNN(4,4) relu':CNN((4,4), epochs=10),
-          'CNN(4,4) sigmoid': CNN((4,4),activation='sigmoid', epochs=10),
-          'CNN(32,64,128) Dense(256) with dropout 0.3 & l2 reg, relu':CNN((32,64,128),dense_layers=(256,),dropout=0.3,regularizer='l2',epochs=10),
-          'CNN(4,4) pool size 3, relu (saved weights)': CNN((4,4), pool_size=3, epochs=0, weights_file='A2/cnn44pool3')}
+          'CNN(4,4) pool size 3, relu (saved weights)': CNN((4,4), pool_size=3, epochs=0, weights_file='A2/cnn44pool3'),
+          'CNN(4,4) pool size 2, relu':CNN((4,4)),
+          'CNN(4,4) pool size 2, sigmoid': CNN((4,4),activation='sigmoid'),
+          'CNN(32,64,128) Dense(256) with dropout 0.3 & l2 reg, relu':CNN((32,64,128),dense_layers=(256,),dropout=0.3,regularizer='l2')}
+  

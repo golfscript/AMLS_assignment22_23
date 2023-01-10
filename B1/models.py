@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from tqdm.notebook import tqdm
 import cv2
 from sklearn.tree import DecisionTreeClassifier, plot_tree
-from utils import cv_optimiser
+import utils
 
 RND = 1 # use in all functions that need random seed in order to ensure repeatability
 
@@ -31,7 +31,7 @@ class DTree:
       min_depth = int(max(y)).bit_length() # need at least this many nodes to distinguish all classes
       self.model.set_params(max_depth=min_depth)
       params = {'criterion':['gini', 'entropy'], 'max_depth':range(min_depth, min_depth+4)}
-      cv_optimiser(self.model, X, y, params)
+      utils.cv_optimiser(self.model, X, y, params)
       print('Performing final fit on all data with optimal params...')
     else:
       print('Peforming fit on all data with selected params...')

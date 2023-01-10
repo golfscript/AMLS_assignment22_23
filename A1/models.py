@@ -8,7 +8,7 @@ from sklearn.experimental import enable_halving_search_cv # need this to enable 
 from sklearn.model_selection import HalvingGridSearchCV
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import cross_val_score
-from utils import cv_optimiser
+import utils
 
 RND = 1 # use in all functions that need random seed in order to ensure repeatability
 
@@ -79,7 +79,7 @@ class PCA_SVC_Optimise(base):
               'svc__gamma':[0.001, 'scale', 0.1],
               'pca__n_components':[80, 100, 120, 140]}
 
-    cv_optimiser(self.model, X, y, params)
+    utils.cv_optimiser(self.model, X, y, params)
     
     X, y = _augment(X, y)
   
