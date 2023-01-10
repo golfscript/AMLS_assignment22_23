@@ -3,12 +3,13 @@ from matplotlib import pyplot as plt
 import cv2
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.model_selection import GridSearchCV
+from utils import cv_optimiser
 
 RND = 1 # use in all functions that need random seed in order to ensure repeatability
 
 def load_image(filename):
   img = cv2.imread(filename) # this task needs colour
-  crop = img[240:280,160:340,::-1] # crop to eyes, reverse GBR to RGB
+  crop = img[240:280,160:250,::-1] # crop to eye, reverse GBR to RGB
   return crop
 
 def _prepare(X):
@@ -35,12 +36,10 @@ class DTreeCV:
   def fit(self, X, y):
     if self.crop_enhance: X = _crop_enhance(X)
     X = _prepare(X)
-    min_depth = y.max() # need at least this many nodes to distinguish all classes
+    min_depth = int(max(y)).bit_length() # need at least this many nodes to distinguish all classes
     params = {'criterion':['gini', 'entropy'], 'max_depth':range(min_depth, min_depth+6)}
-    self.model = GridSearchCV(DecisionTreeClassifier(random_state=RND), params, verbose=3).fit(X,y)
-    print("Optimal hyper-parameters:", self.model.best_params_)
-    print("Mean cross-validated accuracy:", self.model.best_score_)
-    _plot(self.model.best_estimator_)
+    self.model = cv_optimiser(DecisionTreeClassifier(random_state=RND, max_depth=min_depth), X, y, params)
+    _plot(self.model)
     return self.model.score(X,y)
 
   def predict(self, X):

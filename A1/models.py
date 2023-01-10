@@ -1,6 +1,5 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from tqdm.notebook import tqdm
 import cv2
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler, FunctionTransformer
@@ -9,6 +8,7 @@ from sklearn.experimental import enable_halving_search_cv # need this to enable 
 from sklearn.model_selection import HalvingGridSearchCV
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import cross_val_score
+from utils import cv_optimiser
 
 RND = 1 # use in all functions that need random seed in order to ensure repeatability
 
@@ -78,18 +78,8 @@ class PCA_SVC_Optimise(base):
               'svc__C':[0.1, 1, 10],
               'svc__gamma':[0.001, 'scale', 0.1],
               'pca__n_components':[80, 100, 120, 140]}
-    
-    for param, values in params.items():
-      print(f'Peforming Cross Validation on optimal {param}...')
-      prog_bar = tqdm(values, desc='cross validation')
-      scores = [cross_val_score(self.model.set_params(**{param:v}), X, y, n_jobs=-1).mean() for v in prog_bar]
-      plt.plot([str(v) for v in values], scores)
-      plt.show()
 
-      best = values[np.argmax(scores)]
-      best_score = max(scores)
-      print(f'Optimal {param} is', best)
-      self.model.set_params(**{param:best})
+    cv_optimiser(self.model, X, y, params)
     
     X, y = _augment(X, y)
   
