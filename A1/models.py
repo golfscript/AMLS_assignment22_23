@@ -2,7 +2,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 from tqdm.notebook import tqdm
 import cv2
-from skimage import exposure
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler, FunctionTransformer
 from sklearn.svm import SVC
