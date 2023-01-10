@@ -12,7 +12,6 @@ IMGS = 'img'
 TEST = '_test'
 
 TASKS = {'A1':('celeba',2,1,A1), 'A2':('celeba',3,1,A2), 'B1':('cartoon_set',2,3,B1),'B2':('cartoon_set',1,3,B2)}
-task_options = widgets.RadioButtons(options=TASKS, description='Task')
 
 def load_data(folder, feature_col, file_col, load_image, test=False):
   if test: folder += TEST # if loading test data add TEST to folder name
@@ -69,3 +68,9 @@ def cv_optimiser(model, X, y, params):
 
   print('Performing final fit on all data with optimal params...')
   return model.fit(X, y)
+
+task_options = widgets.RadioButtons(options=TASKS, description='Task')
+
+opts = {**A1.options, **A2.options, **B1.options, **B2.options}
+selected = list(task_options.value[3].options.values())[0]
+model_options = widgets.Dropdown(options=opts, value=selected, description='Model', layout=widgets.Layout(width='70%'))
