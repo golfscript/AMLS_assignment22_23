@@ -1,4 +1,4 @@
-import numpy as np
+from matplotlib import pyplot as plt
 from os import environ
 environ['TF_CPP_MIN_LOG_LEVEL'] = '1' # suppress TensorFlow info messages
 import tensorflow as tf
@@ -59,8 +59,17 @@ class CNN:
       self.model.load_weights(self.weights_file) # then load weights
     
     if self.epochs==0: return self.model.evaluate(X, y)[1] # if epochs=0, then just return evaluation
-    
-    return self.model.fit(X, y, epochs=self.epochs, validation_split=0.1, **kwargs).history['accuracy'][-1]
+    history = self.model.fit(X, y, epochs=self.epochs, validation_split=0.1, **kwargs).history
+
+    plt.plot([a*100 for a in history['accuracy']])
+    plt.plot([a*100 for a in history['val_accuracy']])
+    plt.title('Accuracy after each epoch')
+    plt.xlabel('epoch')
+    plt.ylabel('% accuracy')
+    plt.legend(['train', 'validation'], loc='lower right')
+    plt.show()
+
+    return history['accuracy'][-1] # return last accuracy score
 
   def predict(self, X):
     X = _prepare(X)
@@ -68,9 +77,9 @@ class CNN:
     if y.shape[1]>1: return y.argmax(axis=-1) # select prediction with highest output
     return (y.reshape(-1)>=0.5)*1 # convert to 0 or 1
 
-options = {'*Best A2: CNN(4,4) pool size 3 relu': CNN((4,4), pool_size=3, epochs=50),
+options = {'*Best A2: CNN(4,4) pool size 3 relu': CNN((4,4), pool_size=3, epochs=10),
           'CNN(4,4) pool size 3, relu (saved weights)': CNN((4,4), pool_size=3, epochs=0, weights_file='A2/cnn44pool3'),
           'CNN(4,4) pool size 2, relu':CNN((4,4)),
           'CNN(4,4) pool size 2, sigmoid': CNN((4,4),activation='sigmoid'),
-          'CNN(32,64,128) Dense(256) with dropout 0.3 & l2 reg, relu':CNN((32,64,128),dense_layers=(256,))}
+          'CNN(32,64,128) Dense(256) relu':CNN((32,64,128),dense_layers=(256,))}
   

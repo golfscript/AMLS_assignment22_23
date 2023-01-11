@@ -30,9 +30,8 @@ class DTree:
     if self.cv_optimise:
       min_depth = int(max(y)).bit_length() # need at least this many nodes to distinguish all classes
       self.model.set_params(max_depth=min_depth)
-      params = {'criterion':['gini', 'entropy'], 'max_depth':range(min_depth, min_depth+4)}
+      params = {'criterion':['gini', 'entropy'], 'max_depth':range(min_depth, min_depth+5)}
       utils.cv_optimiser(self.model, X, y, params)
-      print('Performing final fit on all data with optimal params...')
     else:
       print('Peforming fit on all data with selected params...')
       self.model.fit(X, y)
