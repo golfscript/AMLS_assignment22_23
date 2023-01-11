@@ -35,7 +35,8 @@ class DTreeCV:
     X = _prepare(X)
     min_depth = int(max(y)).bit_length() # need at least this many nodes to distinguish all classes
     params = {'criterion':['gini', 'entropy'], 'max_depth':range(min_depth, min_depth+5)}
-    self.model = utils.cv_optimiser(DecisionTreeClassifier(random_state=RND, max_depth=min_depth), X, y, params)
+    self.model = DecisionTreeClassifier(random_state=RND, max_depth=min_depth)
+    utils.cv_optimiser(self.model, X, y, params)
     _plot(self.model)
     return self.model.score(X,y)
 

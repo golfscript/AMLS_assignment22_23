@@ -66,20 +66,27 @@ def show_wrong(X, y, y_pred):
     plt.imshow(X[i], cmap='gray')
     if w%5==4: plt.show()
 
+def cv_plot(name, values, scores):
+  plt.plot([str(v) for v in values], [s*100 for s in scores])
+  plt.title(f'Mean cross validated accuracy for {name}')
+  plt.xlabel(name)
+  plt.ylabel('% accuracy')
+  plt.show()
+
 def cv_optimiser(model, X, y, params):
   for param, values in params.items():
-    print(f'Peforming Cross Validation on optimal {param}...')
+    name = param.replace('__', ' ')
+    print(f'Peforming Cross Validation on optimal {name}...')
     prog_bar = tqdm(values, desc='cross validation')
-    scores = [cross_val_score(model.set_params(**{param:v}), X, y, n_jobs=-1).mean() for v in prog_bar]
-    plt.plot([str(v) for v in values], scores)
-    plt.show()
-
+    scores = [cross_val_score(model.set_params(**{param:v}), X, y).mean() for v in prog_bar]
+    cv_plot(name, values, scores)
     best = values[np.argmax(scores)]
     print(f'Optimal {param} is', best)
     model.set_params(**{param:best})
 
   print('Performing final fit on all data with optimal params...')
-  return model.fit(X, y)
+  model.fit(X, y)
+  return min(scores) # return best score
 
 def reload():
   importlib.reload(A1)
