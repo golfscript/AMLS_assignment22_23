@@ -15,7 +15,7 @@ def _prepare(X):
   return X.reshape(*X.shape,1) if X.ndim == 3 else X # reshape if necessary for Conv2D layer
 
 class CNN:
-  def __init__(self, cnn_layers=(), pool_size=2, dense_layers=(), activation='relu', dropout=0, regularizer=None, epochs=10, weights_file=None):
+  def __init__(self, cnn_layers=(), pool_size=2, dense_layers=(), activation='relu', dropout=0.3, regularizer='l2', epochs=10, weights_file=None):
     self.cnn_layers = cnn_layers
     self.pool_size = pool_size
     self.dense_layers = dense_layers
@@ -25,7 +25,7 @@ class CNN:
     self.epochs = epochs
     self.weights_file = weights_file
 
-  def fit(self, X, y, validation_data=None):
+  def fit(self, X, y, **kwargs):
     X = _prepare(X)
     tf.keras.utils.set_random_seed(RND)
     self.model = tf.keras.Sequential([tf.keras.layers.Rescaling(1./255, input_shape=X.shape[1:]), # rescale
@@ -49,18 +49,17 @@ class CNN:
       final_layer = 1 # if only two classes then it's a binary problem
       loss_fn = tf.keras.losses.BinaryCrossentropy
 
-    self.model.add(tf.keras.layers.Dense(final_layer, activation='sigmoid')) # final layer for classification
+    self.model.add(tf.keras.layers.Dense(final_layer, activation='sigmoid', kernel_regularizer=self.regularizer)) # final layer for classification
 
     self.model.summary() # print a summary of the model
+    self.model.compile(optimizer='adam', loss=loss_fn(from_logits=False), metrics=['accuracy'])
 
     if self.weights_file: # if load file specified
       self.model.load_weights(self.weights_file) # then load weights
-
-    self.model.compile(optimizer='adam', loss=loss_fn(from_logits=False), metrics=['accuracy'])
     
     if self.epochs==0: return self.model.evaluate(X, y)[1] # if epochs=0, then just return evaluation
     
-    return self.model.fit(X, y, epochs=self.epochs, validation_data=validation_data).history['accuracy'][-1]
+    return self.model.fit(X, y, epochs=self.epochs, validation_split=0.1, **kwargs).history['accuracy'][-1]
 
   def predict(self, X):
     X = _prepare(X)
@@ -72,5 +71,5 @@ options = {'*Best A2: CNN(4,4) pool size 3 relu': CNN((4,4), pool_size=3, epochs
           'CNN(4,4) pool size 3, relu (saved weights)': CNN((4,4), pool_size=3, epochs=0, weights_file='A2/cnn44pool3'),
           'CNN(4,4) pool size 2, relu':CNN((4,4)),
           'CNN(4,4) pool size 2, sigmoid': CNN((4,4),activation='sigmoid'),
-          'CNN(32,64,128) Dense(256) with dropout 0.3 & l2 reg, relu':CNN((32,64,128),dense_layers=(256,),dropout=0.3,regularizer='l2')}
+          'CNN(32,64,128) Dense(256) with dropout 0.3 & l2 reg, relu':CNN((32,64,128),dense_layers=(256,))}
   
