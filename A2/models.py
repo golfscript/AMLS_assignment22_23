@@ -15,9 +15,10 @@ def _prepare(X):
   return X.reshape(*X.shape,1) if X.ndim == 3 else X # reshape if necessary for Conv2D layer
 
 class CNN:
-  def __init__(self, cnn_layers=(), pool_size=2, dense_layers=(), activation='relu', dropout=0.3, regularizer='l2', epochs=10, weights_file=None):
+  def __init__(self, cnn_layers=(), kernel_size=3, pool_size=2, dense_layers=(), activation='relu', dropout=0.3, regularizer='l2', epochs=10, weights_file=None):
     self.cnn_layers = cnn_layers
     self.pool_size = pool_size
+    self.kernel_size = kernel_size
     self.dense_layers = dense_layers
     self.activation = activation
     self.dropout = dropout
@@ -32,7 +33,7 @@ class CNN:
       tf.keras.layers.RandomFlip(mode='horizontal')]) # data augmentation
 
     for n in self.cnn_layers: # add CNN layers
-      self.model.add(tf.keras.layers.Conv2D(n, 3, activation=self.activation))
+      self.model.add(tf.keras.layers.Conv2D(n, self.kernel_size, activation=self.activation))
       self.model.add(tf.keras.layers.MaxPooling2D(self.pool_size))
       if self.dropout>0:
         self.model.add(tf.keras.layers.SpatialDropout2D(self.dropout))
