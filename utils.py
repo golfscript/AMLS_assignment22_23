@@ -5,6 +5,7 @@ import A1.models as A1, A2.models as A2, B1.models as B1, B2.models as B2
 from matplotlib import pyplot as plt
 from tqdm.notebook import tqdm
 import ipywidgets as widgets
+import importlib
 
 LABELS = 'labels.csv'
 DATASETS = 'Datasets'
@@ -80,3 +81,8 @@ def cv_optimiser(model, X, y, params):
   print('Performing final fit on all data with optimal params...')
   return model.fit(X, y)
 
+def reload():
+  importlib.reload(A1)
+  importlib.reload(A2)
+  importlib.reload(B1)
+  importlib.reload(B2)
