@@ -61,18 +61,18 @@ class base:
 
 class PCA_SVC_Optimise(base):
   def fit(self, X, y):
-    print('Peforming Cross Validation on Contrast Limited Adaptive Histogram Equalisation...')
-    best_score = cross_val_score(self.model, X, y, n_jobs=-1).mean()
+    if X.ndims==3: # Only apply CLAHE for greyscale images
+      print('Peforming Cross Validation on Contrast Limited Adaptive Histogram Equalisation...')
+      best_score = cross_val_score(self.model, X, y, n_jobs=-1).mean()
 
-    Xc = _clahe(X)
-    clahe_score = cross_val_score(self.model, Xc, y, n_jobs=-1).mean()
-    plt.plot(['No CLAHE', 'CLAHE'], [best_score, clahe_score])
-    plt.show()
+      Xc = _clahe(X)
+      clahe_score = cross_val_score(self.model, Xc, y, n_jobs=-1).mean()
+      plt.plot(['No CLAHE', 'CLAHE'], [best_score, clahe_score])
+      plt.show()
 
-    self.clahe = clahe_score > best_score # use CLAHE if cv score is better
-    if self.clahe:
-      X = Xc
-      best_score = clahe_score
+      self.clahe = clahe_score > best_score # use CLAHE if cv score is better
+      if self.clahe:
+        X = Xc
 
     params = {'svc__kernel':['linear','poly','rbf','sigmoid'],
               'svc__C':[0.1, 1, 10],
@@ -81,9 +81,8 @@ class PCA_SVC_Optimise(base):
 
     utils.cv_optimiser(self.model, X, y, params)
     
+    print('Peforming Cross Validation on Data Augmentation...')
     X, y = _augment(X, y)
-  
-    print('Peforming Cross Validation on Contrast Limited Adaptive Histogram Equalisation...')
     aug_score = cross_val_score(self.model, X, y, n_jobs=-1).mean()
     plt.plot(['No augmentation', 'Data augmentaion'], [best_score, aug_score])
     plt.show()
