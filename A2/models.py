@@ -2,6 +2,7 @@ from matplotlib import pyplot as plt
 from os import environ
 environ['TF_CPP_MIN_LOG_LEVEL'] = '1' # suppress TensorFlow info messages
 import tensorflow as tf
+from sklearn.model_selection import train_test_split
 import cv2
 
 RND = 1 # use in all functions that need random seed in order to ensure repeatability
@@ -26,7 +27,7 @@ class CNN:
     self.epochs = epochs
     self.weights_file = weights_file
 
-  def fit(self, X, y, **kwargs):
+  def fit(self, X, y):
     X = _prepare(X)
     tf.keras.utils.set_random_seed(RND)
     self.model = tf.keras.Sequential([tf.keras.layers.Rescaling(1./255, input_shape=X.shape[1:]), # rescale
@@ -59,7 +60,10 @@ class CNN:
       self.model.load_weights(self.weights_file) # then load weights
     
     if self.epochs==0: return self.model.evaluate(X, y)[1] # if epochs=0, then just return evaluation
-    history = self.model.fit(X, y, epochs=self.epochs, validation_split=0.1, **kwargs).history
+
+    print('Performing validated assessment of model accuracy...')
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1, random_state=RND)
+    history = self.model.fit(X_train, y_train, epochs=self.epochs, validation_data=(X_val, y_val)).history
 
     plt.plot([a*100 for a in history['accuracy']])
     plt.plot([a*100 for a in history['val_accuracy']])
@@ -69,7 +73,10 @@ class CNN:
     plt.legend(['train', 'validation'], loc='lower right')
     plt.show()
 
-    return history['accuracy'][-1] # return last accuracy score
+    print('Performing final fit on all data...')
+    history = self.model.fit(X, y, epochs=self.epochs).history
+
+    return history['accuracy'][-1] # return latest accuracy score
 
   def predict(self, X):
     X = _prepare(X)
@@ -77,9 +84,9 @@ class CNN:
     if y.shape[1]>1: return y.argmax(axis=-1) # select prediction with highest output
     return (y.reshape(-1)>=0.5)*1 # convert to 0 or 1
 
-options = {'*Best A2: CNN(4,4) pool size 3 relu': CNN((4,4), pool_size=3, epochs=10),
-          'CNN(4,4) pool size 3, relu (saved weights)': CNN((4,4), pool_size=3, epochs=0, weights_file='A2/cnn44pool3'),
-          'CNN(4,4) pool size 2, relu':CNN((4,4)),
-          'CNN(4,4) pool size 2, sigmoid': CNN((4,4),activation='sigmoid'),
-          'CNN(32,64,128) Dense(256) relu':CNN((32,64,128),dense_layers=(256,))}
+options = {'*Best A2: Small CNN(4,4) pool size 3': CNN((4,4), pool_size=3, epochs=60),
+          'Small CNN(4,4) pool size 3 (saved weights)': CNN((4,4), pool_size=3, epochs=0, weights_file='A2/cnn44pool3'),
+          'Tiny CNN(2,2) pool size 4':CNN((2,2),pool_size=4,epochs=60),
+          'Medium CNN(8,16) pool size 2, Dense(128)':CNN((8,16),dense_layers=(128,),epochs=30),
+          'Large CNN(32,64,128) pool size 2, Dense(256)':CNN((32,64,128),dense_layers=(256,))}
   
