@@ -115,5 +115,5 @@ class PCA_SVC(base):
     return self.model.score(X,y)
 
 options = {'*Best A1: PCA & SVC with CV paramater optimisation': PCA_SVC_Optimise(),
-          'PCA & SVC with pre-optimised parameters': PCA_SVC(120),
-          'Halving Grid Search with Cross Validation': PCA_SVC_HCV(120)}
+          'A1: PCA & SVC with pre-optimised parameters': PCA_SVC(120),
+          'A1: Halving Grid Search with Cross Validation': PCA_SVC_HCV(120)}

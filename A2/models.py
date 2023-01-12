@@ -85,8 +85,8 @@ class CNN:
     return (y.reshape(-1)>=0.5)*1 # convert to 0 or 1
 
 options = {'*Best A2: Small CNN': CNN((4,4), pool_size=3, epochs=60),
-          'Small CNN (saved weights)': CNN((4,4), pool_size=3, epochs=0, weights_file='A2/cnn44pool3'),
-          'Tiny CNN':CNN((2,2),pool_size=4,epochs=60),
-          'Medium CNN':CNN((8,16),dense_layers=(128,),epochs=30),
-          'Large CNN':CNN((32,64,128),dense_layers=(256,))}
+          'A2: Small CNN (saved weights)': CNN((4,4), pool_size=3, epochs=0, weights_file='A2/cnn44pool3'),
+          'A2: Tiny CNN':CNN((2,2),pool_size=4,epochs=60),
+          'A2: Medium CNN':CNN((8,16),dense_layers=(128,),epochs=30),
+          'A2: Large CNN':CNN((32,64,128),dense_layers=(256,))}
   

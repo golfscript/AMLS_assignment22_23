@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 import cv2
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 import utils
+import B1.models
 
 RND = 1 # use in all functions that need random seed in order to ensure repeatability
 
@@ -28,7 +29,7 @@ def _crop_enhance(X):
   print(f'{(mn==mx).all(axis=-1).mean():.2%} of samples have no variance')
   return np.divide(X-mn,np.maximum((mx-mn),1), dtype=np.float32)*255 # Tree classifier creates copy if not float32
 
-class DTreeCV:
+class IrisDTree:
   def fit(self, X, y):
     X = _crop_enhance(X)
     X = _prepare(X)
@@ -44,4 +45,6 @@ class DTreeCV:
     X = _prepare(X)
     return self.model.predict(X)
 
-options = {'*Best B2: Iris Enhance & Decision Tree with CV paramater optimisation': DTreeCV()}
+options = {'*Best B2: Decision Tree with CV paramater optimisation': B1.models.DTree(cv_optimise=True),
+          'B2: Decision Tree with pre-optimsed parameters':B1.models.DTree(criterion='entropy', max_depth=9),
+          'B2: Iris Enhance & Decision Tree with CV paramater optimisation': IrisDTree()}
