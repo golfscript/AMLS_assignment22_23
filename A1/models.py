@@ -61,7 +61,9 @@ class base:
 
 class PCA_SVC_Optimise(base):
   def fit(self, X, y):
-    if X.ndim==3: # Only apply CLAHE for greyscale images
+    if X.ndim!=3: # If colour images, don't try CLAHE
+      self.clahe = False
+    else: # If greyscale images, try CLAHE
       print('Peforming Cross Validation on Contrast Limited Adaptive Histogram Equalisation...')
       best_score = cross_val_score(self.model, X, y).mean()
 
