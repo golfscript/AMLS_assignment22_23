@@ -3,7 +3,6 @@ from matplotlib import pyplot as plt
 import cv2
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 import utils
-import B1.models as B1
 
 RND = 1 # use in all functions that need random seed in order to ensure repeatability
 
@@ -45,5 +44,4 @@ class DTreeCV:
     X = _prepare(X)
     return self.model.predict(X)
 
-options = {'*Best B2: Iris Enhance & Decision Tree with CV optimised paramaters': DTreeCV(),
-          'Decision Tree with CV optimised paramaters': B1.DTree(cv_optimise=True)}
+options = {'*Best B2: Iris Enhance & Decision Tree with CV optimised paramaters': DTreeCV()}
