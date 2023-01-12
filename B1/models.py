@@ -43,5 +43,5 @@ class DTree:
     X = _prepare(X)
     return self.model.predict(X)
 
-options = {'*Best B1: Decision Tree with CV of optimal params': DTree(cv_optimise=True),
-           'Decision Tree with Entropy and max depth of 6': DTree(criterion='entropy', max_depth=6)}
+options = {'*Best B1: Decision Tree with CV paramater optimisation': DTree(cv_optimise=True),
+           'Decision Tree with pre-optimsed parameters': DTree(criterion='entropy', max_depth=6)}

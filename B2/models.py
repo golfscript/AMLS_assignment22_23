@@ -44,4 +44,4 @@ class DTreeCV:
     X = _prepare(X)
     return self.model.predict(X)
 
-options = {'*Best B2: Iris Enhance & Decision Tree with CV optimised paramaters': DTreeCV()}
+options = {'*Best B2: Iris Enhance & Decision Tree with CV paramater optimisation': DTreeCV()}

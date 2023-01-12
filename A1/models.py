@@ -24,21 +24,16 @@ def _augment(X, y):
   X = np.tile(X,(2,1,1))
   X[n:] = X[:n,:,::-1]  # copy images, but reverse left to right
 
-  plt.figure(figsize=(12,3))
-  for i in range(5):
-    plt.subplot(1, 5, i+1)
-    plt.axis('off')
-    plt.title(f'[{i}]')
-    plt.imshow(X[i+n], cmap='gray')
-  plt.show()
-
+  utils.show_images(X[n:],y[n:])
   return X, y
 
 def _clahe(X):
+  print('Performing CLAHE...')
   eq = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(5,6)) # choose grid that divides 70*90 image
   Z = X.copy()
   for i in range(len(Z)):
     Z[i] = eq.apply(Z[i])
+  utils.show_images(Z)
   return Z
 
 def _prepare(X, y, clahe, augment):
@@ -78,7 +73,7 @@ class PCA_SVC_Optimise(base):
     params = {'svc__kernel':['linear','poly','rbf','sigmoid'],
               'svc__C':[0.1, 1, 10],
               'svc__gamma':[0.001, 'scale', 0.1],
-              'pca__n_components':[80, 100, 120, 140]}
+              'pca__n_components':[60, 80, 100, 120, 140]}
 
     best_score = utils.cv_optimiser(self.model, X, y, params)
     
@@ -119,6 +114,6 @@ class PCA_SVC(base):
     self.model.fit(X,y)
     return self.model.score(X,y)
 
-options = {'*Best A1: PCA & SVC with CV optimised paramaters': PCA_SVC_Optimise(),
-          'Clahe, Augment, PCA & SVC Halving Grid Search with Cross Validation': PCA_SVC_HCV(120),
-          'Clahe, Augment, PCA(120) & SVC(default params)': PCA_SVC(120)}
+options = {'*Best A1: PCA & SVC with CV paramater optimisation': PCA_SVC_Optimise(),
+          'PCA & SVC with pre-optimised parameters': PCA_SVC(120),
+          'Halving Grid Search with Cross Validation': PCA_SVC_HCV(120)}

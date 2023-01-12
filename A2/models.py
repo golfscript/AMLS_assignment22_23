@@ -84,9 +84,9 @@ class CNN:
     if y.shape[1]>1: return y.argmax(axis=-1) # select prediction with highest output
     return (y.reshape(-1)>=0.5)*1 # convert to 0 or 1
 
-options = {'*Best A2: Small CNN(4,4) pool size 3': CNN((4,4), pool_size=3, epochs=60),
-          'Small CNN(4,4) pool size 3 (saved weights)': CNN((4,4), pool_size=3, epochs=0, weights_file='A2/cnn44pool3'),
-          'Tiny CNN(2,2) pool size 4':CNN((2,2),pool_size=4,epochs=60),
-          'Medium CNN(8,16) pool size 2, Dense(128)':CNN((8,16),dense_layers=(128,),epochs=30),
-          'Large CNN(32,64,128) pool size 2, Dense(256)':CNN((32,64,128),dense_layers=(256,))}
+options = {'*Best A2: Small CNN': CNN((4,4), pool_size=3, epochs=60),
+          'Small CNN (saved weights)': CNN((4,4), pool_size=3, epochs=0, weights_file='A2/cnn44pool3'),
+          'Tiny CNN':CNN((2,2),pool_size=4,epochs=60),
+          'Medium CNN':CNN((8,16),dense_layers=(128,),epochs=30),
+          'Large CNN':CNN((32,64,128),dense_layers=(256,))}
   
