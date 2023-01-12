@@ -46,12 +46,12 @@ def load_task_data():
   X_test, y_test = load_data(dataset, feature_col, file_col, models.load_image, test=True)
   return X, y, X_test, y_test
 
-def show_images(X, y):
+def show_images(X, y=None):
   plt.figure(figsize=(12,3))
   for i in range(5):
     plt.subplot(1, 5, i+1)
     plt.axis('off')
-    plt.title(f'[{i}] class:{y[i]}')
+    plt.title(f'[{i}]' if y is None else f'[{i}] class:{y[i]}')
     plt.imshow(X[i], cmap='gray')
   plt.show()
 
@@ -73,12 +73,12 @@ def cv_plot(name, values, scores):
   plt.ylabel('% accuracy')
   plt.show()
 
-def cv_optimiser(model, X, y, params):
+def cv_optimiser(model, X, y, params, cv=5):
   for param, values in params.items():
     name = param.replace('__', ' ')
     print(f'Peforming Cross Validation on optimal {name}...')
     prog_bar = tqdm(values, desc='cross validation')
-    scores = [cross_val_score(model.set_params(**{param:v}), X, y).mean() for v in prog_bar]
+    scores = [cross_val_score(model.set_params(**{param:v}), X, y, cv=cv).mean() for v in prog_bar]
     cv_plot(name, values, scores)
     best = values[np.argmax(scores)]
     print(f'Optimal {param} is', best)
@@ -86,7 +86,7 @@ def cv_optimiser(model, X, y, params):
 
   print('Performing final fit on all data with optimal params...')
   model.fit(X, y)
-  return min(scores) # return best score
+  return max(scores) # return best score
 
 def reload():
   importlib.reload(A1)
