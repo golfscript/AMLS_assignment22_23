@@ -87,7 +87,7 @@ def show_images(X, y=None):
     plt.subplot(1, 5, i+1)
     plt.axis('off')
     plt.title(f'[{i}]' if y is None else f'[{i}] class:{y[i]}')
-    plt.imshow(X[i], cmap='gray')
+    plt.imshow(X[i], cmap='gray') # cmap is ignored if RGB image
   plt.show()
 
 def show_wrong(X, y, y_pred):
@@ -106,7 +106,7 @@ def show_wrong(X, y, y_pred):
     plt.subplot(1, 5, w%5+1)
     plt.axis('off')
     plt.title(f'[{i}] class:{y[i]} pred:{y_pred[i]}')
-    plt.imshow(X[i], cmap='gray')
+    plt.imshow(X[i], cmap='gray') # cmap is ignored if RGB image
     if w%5==4: plt.show()
 
 def cv_plot(name, values, scores):
