@@ -130,7 +130,11 @@ def cv_optimiser(model, X, y, params, cv=5, refit=True):
     model: a Scikit-learn model
     X: numpy array. Training data
     y: numpy array. Labels
-    params: dict. Parameter names:list of values
+    params: dict. Parameter names:list of values, e.g.
+      {'svc__kernel':['linear','poly','rbf','sigmoid'],
+      'svc__C':[0.1, 1, 10],
+      'svc__gamma':[0.001, 'scale', 0.1],
+      'pca__n_components':[60, 80, 100, 120, 140]}
     cv: integer. Number of cross validation folds to use (default: 5)
     refit: boolean. Whether to fit the optimised model with all training data (default: True)
   Returns:
