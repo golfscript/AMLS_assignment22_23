@@ -8,14 +8,41 @@ import cv2
 RND = 1 # use in all functions that need random seed in order to (try to) ensure repeatability
 
 def load_image(filename):
+  '''Load image, converting to greyscale and centre cropping to 70x90
+  Args:
+    filename: string. The image filename to load
+  Returns:
+    numpy array (2d). The final image
+  '''
   img = cv2.imread(filename, cv2.IMREAD_GRAYSCALE) # use built-in grayscale conversion
   crop = img[90:180, 54:124] # crop to face
   return crop
 
 def _prepare(X):
+  '''Reshape 3d numpy array to 4d if necessary (useful for preparing data for TensorFlow CNN)
+  Args:
+    X: numpy array. The array to reshape
+  Returns:
+    numpy array, The reshaped array
+  '''
   return X.reshape(*X.shape,1) if X.ndim == 3 else X # reshape if necessary for Conv2D layer
 
 class CNN:
+  '''Convolutional neural network model using TensorFlow
+  Attributes:
+    cnn_layers: tuple of integers. The number of features in each conv layer (default: ())
+    kernel_size: integers. The kernel size of the conv layers (default: 3)
+    pool_size: integer. The pool size of the max pooling layer after each conv layer (default: 2)
+    dense_layers: tupel of integers. The number of neurons in each dense layer (default: ())
+    activation: string. The activation function for the conv and dense layers (default: 'relu')
+    dropout: float. The dropout to be applied after each pooling layer and dense layer (default: 0.0)
+    regularizer: string or tf regularizer. The kernel regularizer for the dense layers (default: 'l2')
+    epochs: integer. The number of epochs to train the model (default: 10)
+    weights_file: string. The name of a saved weights file to be loaded (default: None)
+  Methods:
+    fit(X, y)
+    predict(X)
+  '''
   def __init__(self, cnn_layers=(), kernel_size=3, pool_size=2, dense_layers=(), activation='relu', dropout=0.3, regularizer='l2', epochs=10, weights_file=None):
     self.cnn_layers = cnn_layers
     self.pool_size = pool_size
@@ -28,6 +55,13 @@ class CNN:
     self.weights_file = weights_file
 
   def fit(self, X, y):
+    '''Train the CNN with the given data
+    Args:
+      X: numpy array. The 3d(grayscale) or 4d(colour) image dataset
+      y: numpy array. The labels
+    Returns:
+      float. The last accuracy score from training
+    '''
     X = _prepare(X)
     tf.keras.utils.set_random_seed(RND)
     self.model = tf.keras.Sequential([tf.keras.layers.Rescaling(1./255, input_shape=X.shape[1:]), # rescale
@@ -79,11 +113,18 @@ class CNN:
     return history['accuracy'][-1] # return latest accuracy score
 
   def predict(self, X):
+    '''Run the CNN to predict the labels from a given dataset
+    Args:
+      X: numpy array. The 3d(grayscale) or 4d(colour) image dataset
+    Returns:
+      numpy array. The array of predicted labels
+    '''
     X = _prepare(X)
     y = self.model.predict(X)
     if y.shape[1]>1: return y.argmax(axis=-1) # select prediction with highest output
     return (y.reshape(-1)>=0.5)*1 # convert to 0 or 1
 
+# This dict of model options is used by the utils module to create a dropdown list
 options = {'*Best A2: Small CNN': CNN((4,4), pool_size=3, epochs=60),
           'A2: Small CNN (saved weights)': CNN((4,4), pool_size=3, epochs=0, weights_file='A2/cnn44pool3'),
           'A2: Tiny CNN':CNN((2,2),pool_size=4,epochs=60),

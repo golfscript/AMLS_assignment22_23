@@ -155,6 +155,15 @@ def cv_optimiser(model, X, y, params, cv=5, refit=True):
     model.fit(X, y)
   return max(scores) # return best score from last cv
 
+def flatten(X):
+  '''Flattens a numpy array to 2d without copying, preserving the first dimension, but flattening all the others
+  Args:
+    X: numpy array. The 2 or more dimensional array to flatten
+  Returns:
+    numpy array. The flattened array
+  '''
+  return X.reshape(len(X),-1) # flatten the last dims of X without copying
+
 def reload():
   '''Development function to reload all task modules'''
   importlib.reload(A1)

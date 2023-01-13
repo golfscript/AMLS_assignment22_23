@@ -13,11 +13,23 @@ import utils
 RND = 1 # use in all functions that need random seed in order to ensure repeatability
 
 def load_image(filename):
+  '''Load image, converting to greyscale and centre cropping to 70x90
+  Args:
+    filename: string. The image filename to load
+  Returns:
+    numpy array (2d). The final image
+  '''
   img = cv2.imread(filename, cv2.IMREAD_GRAYSCALE) # use built-in grayscale conversion
   crop = img[90:180, 54:124] # crop to face
   return crop
 
 def _augment(X, y):
+  '''Augment the given dataset by flipping each image horizontally
+      X: numpy array. The 3d(grayscale) or 4d(colour) image dataset
+      y: numpy array. The labels
+    Returns:
+      tuple of numpy arrays. The augmented image dataset, and augmented labels
+    '''
   print('Performing Data Augmentation...')
   n = len(X)
   y = np.tile(y,2)
@@ -28,6 +40,12 @@ def _augment(X, y):
   return X, y
 
 def _clahe(X):
+  '''Peform contrast limited adaptive histogram equalisation on an image dataset
+  Args:
+    X: numpy array. The 3d array of greyscale images
+  Returns:
+    numpy array. The 3d array of enhanced images
+  '''
   print('Performing CLAHE...')
   eq = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(5,6)) # choose grid that excatly divides 70*90 image
   Z = X.copy()
@@ -37,25 +55,77 @@ def _clahe(X):
   return Z
 
 def _prepare(X, y, clahe, augment):
+  '''Prepare the given dataset with optional CLAHE and augmentation
+  Args:
+    X: numpy array. The 3d(grayscale) or 4d(colour) image dataset
+    y: numpy array. The labels
+    Returns:
+      tuple of numpy arrays. The prepared image dataset, and labels
+    '''
   if clahe: X = _clahe(X)
   if augment: X, y = _augment(X, y)
   return X,y
 
 def flat_scale(X):
-  return np.divide(X.reshape((len(X),-1)),255.,dtype=np.float32)
+  '''Flatten the given dataset, and scale from 0..255 to 0..1
+  Args:
+   X: numpy array. The image dataset
+  Returns:
+    numpy array. The flattened and scaled dataset
+  '''
+  X = utils.flatten(X)
+  return np.divide(X,255.,dtype=np.float32)
 
-class base:
+class PCA_SVC:
+  '''Base class for PCA and SVC model
+  Attributes:
+    model: sklearn.pipeline.Pipeline. The PCA and SVC model pipeline
+    clahe: boolean. Whether to apply CLAHE before the pipeline
+    augment: boolean. Whether to apply data augmentation before the pipline
+  Methods:
+    fit(X, y): fit the model to the given dataset and labels
+    predict(X): predict labels from the given image dataset
+  '''
   def __init__(self, pca_components=60, clahe=True, augment=True):
     self.model = make_pipeline(FunctionTransformer(flat_scale), PCA(n_components=pca_components,random_state=RND), StandardScaler(), SVC())
     self.clahe = clahe
     self.augment = augment
 
+  def fit(self, X, y):
+    '''Fit the model with the given data
+    Args:
+      X: numpy array. The 3d(grayscale) or 4d(colour) image dataset
+      y: numpy array. The labels
+    Returns:
+      float. The accuracy score on the dataset after fitting
+    '''
+    X, y = _prepare(X, y, self.clahe, self.augment)
+
+    print('Performing Support Vector Classification Fit...')
+    self.model.fit(X,y)
+    return self.model.score(X,y)
+
   def predict(self, X):
+    '''Run the model to predict the labels from a given dataset
+    Args:
+      X: numpy array. The 3d(grayscale) or 4d(colour) image dataset
+    Returns:
+      numpy array. The array of predicted labels
+    '''
     X,_ = _prepare(X, None, self.clahe, False) # don't need to augment prediction
     return self.model.predict(X)
 
-class PCA_SVC_Optimise(base):
+
+class PCA_SVC_Optimise(PCA_SVC):
+  '''PCA and SVC model class with cross-validated optimisation of all paramaters'''
   def fit(self, X, y):
+    '''Train the model with the given data
+    Args:
+      X: numpy array. The 3d(grayscale) or 4d(colour) image dataset
+      y: numpy array. The labels
+    Returns:
+      float. The accuracy score on the dataset after training
+    '''
     if X.ndim!=3: # If colour images, don't try CLAHE
       self.clahe = False
     else: # If greyscale images, try CLAHE
@@ -91,8 +161,15 @@ class PCA_SVC_Optimise(base):
 
     return self.model.score(X,y)
 
-class PCA_SVC_HCV(base):
+class PCA_SVC_HCV(PCA_SVC):
+  '''PCA and SVC model class with successive cv halving optimisation of some parameters'''
   def fit(self, X, y):
+    '''Run the model to predict the labels from a given dataset
+    Args:
+      X: numpy array. The 3d(grayscale) or 4d(colour) image dataset
+    Returns:
+      numpy array. The array of predicted labels
+    '''
     X,y = _prepare(X, y, self.clahe, self.augment)
     
     print('Performing Halving Grid Search with Cross Validation...')
@@ -106,14 +183,7 @@ class PCA_SVC_HCV(base):
     self.model.fit(X,y) # fit to augmented data
     return self.model.score(X,y)
 
-class PCA_SVC(base):
-  def fit(self, X, y):
-    X, y = _prepare(X, y, self.clahe, self.augment)
-
-    print('Performing Support Vector Classification Fit...')
-    self.model.fit(X,y)
-    return self.model.score(X,y)
-
+# This dict of model options is used by the utils module to create a dropdown list
 options = {'*Best A1: PCA & SVC with CV paramater optimisation': PCA_SVC_Optimise(),
           'A1: PCA & SVC with pre-optimised parameters': PCA_SVC(120),
           'A1: Halving Grid Search with Cross Validation': PCA_SVC_HCV(120)}
