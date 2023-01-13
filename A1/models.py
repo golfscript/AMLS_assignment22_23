@@ -50,7 +50,7 @@ def _clahe(X):
   eq = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(5,6)) # choose grid that excatly divides 70*90 image
   Z = X.copy()
   for i in range(len(Z)):
-    Z[i] = eq.apply(Z[i])
+    Z[i] = eq.apply(Z[i]) # apply clahe to each image
   utils.show_images(Z)
   return Z
 

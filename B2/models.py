@@ -12,7 +12,7 @@ def load_image(filename):
   Args:
     filename: string. The image filename to load
   Returns:
-    numpy array (3d). The final image
+    numpy array (3d). The final image in RGB colour
   '''
   img = cv2.imread(filename) # this task needs colour
   crop = img[240:280,170:250,::-1] # crop to eye, reverse BGR to RGB

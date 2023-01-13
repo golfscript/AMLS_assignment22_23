@@ -33,7 +33,7 @@ class CNN:
     cnn_layers: tuple of integers. The number of features in each conv layer (default: ())
     kernel_size: integers. The kernel size of the conv layers (default: 3)
     pool_size: integer. The pool size of the max pooling layer after each conv layer (default: 2)
-    dense_layers: tupel of integers. The number of neurons in each dense layer (default: ())
+    dense_layers: tuple of integers. The number of neurons in each dense layer (default: ())
     activation: string. The activation function for the conv and dense layers (default: 'relu')
     dropout: float. The dropout to be applied after each pooling layer and dense layer (default: 0.0)
     regularizer: string or tf regularizer. The kernel regularizer for the dense layers (default: 'l2')
@@ -83,7 +83,7 @@ class CNN:
     loss_fn = tf.keras.losses.SparseCategoricalCrossentropy
     if final_layer == 2:
       final_layer = 1 # if only two classes then it's a binary problem
-      loss_fn = tf.keras.losses.BinaryCrossentropy
+      loss_fn = tf.keras.losses.BinaryCrossentropy # and switch to using binary cross entropy
 
     self.model.add(tf.keras.layers.Dense(final_layer, activation='sigmoid', kernel_regularizer=self.regularizer)) # final layer for classification
 
@@ -99,6 +99,7 @@ class CNN:
     X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1, random_state=RND)
     history = self.model.fit(X_train, y_train, epochs=self.epochs, validation_data=(X_val, y_val)).history
 
+    # plot scores
     plt.plot([a*100 for a in history['accuracy']])
     plt.plot([a*100 for a in history['val_accuracy']])
     plt.title('Accuracy after each epoch')
@@ -121,8 +122,8 @@ class CNN:
     '''
     X = _prepare(X)
     y = self.model.predict(X)
-    if y.shape[1]>1: return y.argmax(axis=-1) # select prediction with highest output
-    return (y.reshape(-1)>=0.5)*1 # convert to 0 or 1
+    if y.shape[1]>1: return y.argmax(axis=-1) # if multi-class select prediction with highest output
+    return (y.reshape(-1)>=0.5)*1 # if binary then convert to 0 or 1
 
 # This dict of model options is used by the utils module to create a dropdown list
 options = {'*Best A2: Small CNN': CNN((4,4), pool_size=3, epochs=60),
