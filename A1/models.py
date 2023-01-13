@@ -29,7 +29,7 @@ def _augment(X, y):
 
 def _clahe(X):
   print('Performing CLAHE...')
-  eq = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(5,6)) # choose grid that divides 70*90 image
+  eq = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(5,6)) # choose grid that excatly divides 70*90 image
   Z = X.copy()
   for i in range(len(Z)):
     Z[i] = eq.apply(Z[i])

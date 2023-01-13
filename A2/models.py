@@ -5,7 +5,7 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 import cv2
 
-RND = 1 # use in all functions that need random seed in order to ensure repeatability
+RND = 1 # use in all functions that need random seed in order to (try to) ensure repeatability
 
 def load_image(filename):
   img = cv2.imread(filename, cv2.IMREAD_GRAYSCALE) # use built-in grayscale conversion
