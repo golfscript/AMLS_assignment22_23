@@ -73,7 +73,8 @@ def cv_plot(name, values, scores):
   plt.ylabel('% accuracy')
   plt.show()
 
-def cv_optimiser(model, X, y, params, cv=5):
+def cv_optimiser(model, X, y, params, cv=5, refit=True):
+  scores = [0.0] # in case there are no params to fit
   for param, values in params.items():
     name = param.replace('__', ' ')
     print(f'Peforming Cross Validation on optimal {name}...')
@@ -83,10 +84,10 @@ def cv_optimiser(model, X, y, params, cv=5):
     best = values[np.argmax(scores)]
     print(f'Optimal {param} is', best)
     model.set_params(**{param:best})
-
-  print('Performing final fit on all data with optimal params...')
-  model.fit(X, y)
-  return max(scores) # return best score
+  if refit:
+    print('Performing final fit on all data with optimal params...')
+    model.fit(X, y)
+  return max(scores) # return best score from last cv
 
 def reload():
   importlib.reload(A1)

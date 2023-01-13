@@ -75,14 +75,14 @@ class PCA_SVC_Optimise(base):
               'svc__gamma':[0.001, 'scale', 0.1],
               'pca__n_components':[60, 80, 100, 120, 140]}
 
-    best_score = utils.cv_optimiser(self.model, X, y, params)
+    best_score = utils.cv_optimiser(self.model, X, y, params, refit=False)
     
     print('Peforming Cross Validation on Data Augmentation...')
     X, y = _augment(X, y)
     aug_score = cross_val_score(self.model, X, y).mean()
     utils.cv_plot('data augmentation', ['No augmentation', 'Data augmentaion'], [best_score, aug_score])
 
-    self.augment = aug_score>best_score
+    self.augment = aug_score>best_score # use data augmentation if cv score is better
     print('Performing final fit on all data with optimal params...')
     if (self.augment):
       self.model.fit(X,y)
